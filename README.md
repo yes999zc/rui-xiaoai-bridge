@@ -48,7 +48,7 @@ rui 起一个音频平面 → 插件按 rui-device/v1 提供上下行 → 说「
 git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
 bash deploy/install-plug-manifest.sh          # 把 plugin.yaml + adapter 安装到 rui 的插件目录
 PYTHONPATH=src python -m pytest -q            # 契约测试（9 项）
-rui plug-test <插件目录>   # 契约自测（directory 必填，--adapter 指定入口）
+rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契约自测
 ```
 
 安装后重启 rui，在控制台「设备」页添加 LX06，填入设备地址与令牌；也可以直接在 `config.yaml` 的 `devices[]` 里加一条。
@@ -84,7 +84,7 @@ rui plug-test <插件目录>   # 契约自测（directory 必填，--adapter 指
 | 设备一直离线 | 端口不可达 / 令牌不匹配 | 确认 `listen_port` 可达；`token_env` 指向的环境变量有值 |
 | 能唤醒但不回话 | 音频上行或播放下行不通 | 看音频平面的 `[seg]` 与播放日志；确认设备侧 AEC 正常 |
 | 与另一台音箱抢答 | 两台都在同一房间且先后被唤醒 | 分到不同房间；跨房间的播放与回合仲裁互不影响（runner 仍单会话） |
-| `plug-test` 失败 | rui 版本或插件目录不对 | 在 rui 容器内跑 `rui plug-test`，按失败项逐个修 |
+| `plug-test` 失败 | rui 版本或插件目录不对 | 在 rui 容器内跑 `rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build`，按失败项逐个修 |
 
 ## 已知限制
 
@@ -138,7 +138,7 @@ Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports 
 git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
 bash deploy/install-plug-manifest.sh          # installs plugin.yaml + adapter into rui's plug dir
 PYTHONPATH=src python -m pytest -q            # contract tests (9)
-rui plug-test <plugin-dir>   # contract self-test (directory required; --adapter selects the entry)
+rui plug-test <plugin-dir> --adapter rui_xiaoai_bridge.adapter:build   # contract self-test
 ```
 
 Restart rui, then add the LX06 on the console's Devices page (address + token), or append an entry to `devices[]` in `config.yaml`.
@@ -174,7 +174,7 @@ Restart rui, then add the LX06 on the console's Devices page (address + token), 
 | Device stays offline | Port unreachable, or token mismatch | Check the listen port and that `token_env` points at a value |
 | Wakes but never answers | Uplink or playback downlink is broken | Inspect `[seg]` and playback lines in the audio plane logs; verify device AEC |
 | Two speakers talk over each other | Both in the same room and woken in sequence | Put them in different rooms; cross-room playback and turn arbitration are isolated (the runner is still single-session) |
-| `plug-test` fails | Wrong rui version or plug path | Run `rui plug-test` inside the rui container and fix the failing items |
+| `plug-test` fails | Wrong rui version or plug path | Run `rui plug-test <plugin-dir> --adapter rui_xiaoai_bridge.adapter:build` inside the container |
 
 ## Known limitations
 
