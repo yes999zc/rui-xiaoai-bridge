@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package and dev tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      # rui is the in-process host, not a dependency of the package. CI installs the
+      # exact upstream release the manifest declares compatibility with; the PyPI
+      # `rui` project is unrelated, so the GitHub tag is explicit.
+      - name: Install rui host (pinned)
+        run: pip install "rui @ git+https://github.com/yes999zc/rui.git@v0.6.0"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Unit tests
+        run: pytest -q
+
+      - name: Contract kit (manifest + adapter)
+        run: |
+          python -m rui plug-test src/rui_xiaoai_bridge \
+            --adapter rui_xiaoai_bridge.adapter:build

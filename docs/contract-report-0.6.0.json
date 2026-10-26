@@ -1,0 +1,167 @@
+{
+  "schema": "contract-report/v1",
+  "kit": "rui-plug-test",
+  "generated_at": "2026-10-26T01:10:02.658771+00:00",
+  "rui": "0.6.0",
+  "plugin": {
+    "dir": "src/rui_xiaoai_bridge",
+    "id": "xiaoai-lx06",
+    "trust": "trusted",
+    "loader": "core",
+    "devices": [
+      {
+        "id": "lx06",
+        "file": "devices/lx06.yaml",
+        "schema": "rui-device/v1",
+        "capabilities": [
+          "mic_array",
+          "reference",
+          "playback",
+          "led",
+          "keys",
+          "volume"
+        ],
+        "wake": null,
+        "runtime": "in-process"
+      }
+    ]
+  },
+  "adapter": "rui_xiaoai_bridge.adapter:build",
+  "checks": [
+    {
+      "id": "manifest.load",
+      "status": "PASS",
+      "detail": "loaded by rui.plugins.load_plugin (0.6.0)"
+    },
+    {
+      "id": "manifest.devices",
+      "status": "PASS",
+      "detail": "1 device(s): lx06"
+    },
+    {
+      "id": "manifest.compatibility",
+      "status": "PASS",
+      "detail": "requires >=0.6.0 <0.7.0; this build is 0.6.0"
+    },
+    {
+      "id": "manifest.capabilities",
+      "status": "PASS",
+      "detail": "capabilities match the v1 vocabulary"
+    },
+    {
+      "id": "manifest.wake",
+      "status": "PASS",
+      "detail": "capability/wake dependencies are consistent"
+    },
+    {
+      "id": "manifest.runtime",
+      "status": "PASS",
+      "detail": "trust and runtime mode are consistent"
+    },
+    {
+      "id": "manifest.wake_words",
+      "status": "PASS",
+      "detail": "device wake words are declared or configured"
+    },
+    {
+      "id": "adapter.import",
+      "status": "PASS",
+      "detail": "rui_xiaoai_bridge.adapter:build imported lazily"
+    },
+    {
+      "id": "adapter.construct",
+      "status": "PASS",
+      "detail": "built XiaoaiAdapter"
+    },
+    {
+      "id": "adapter.methods",
+      "status": "PASS",
+      "detail": "DeviceAdapter surface incl. drain_wakes"
+    },
+    {
+      "id": "device.ready",
+      "status": "PASS",
+      "detail": "id=lx06 transport=inbound 8ch @ 48000 Hz"
+    },
+    {
+      "id": "device.probe_layout",
+      "status": "PASS",
+      "detail": "probe() layout matches the manifest"
+    },
+    {
+      "id": "device.open",
+      "status": "SKIP",
+      "detail": "inbound LX06: open() listens on ws://:<port> and capture/playback need the open-xiaoai client to dial in; probe() and the method surface were still exercised"
+    },
+    {
+      "id": "capture.frames",
+      "status": "SKIP",
+      "detail": "inbound LX06: open() listens on ws://:<port> and capture/playback need the open-xiaoai client to dial in; probe() and the method surface were still exercised"
+    },
+    {
+      "id": "capture.cadence",
+      "status": "SKIP",
+      "detail": "inbound LX06: open() listens on ws://:<port> and capture/playback need the open-xiaoai client to dial in; probe() and the method surface were still exercised"
+    },
+    {
+      "id": "playback.sink",
+      "status": "SKIP",
+      "detail": "inbound LX06: open() listens on ws://:<port> and capture/playback need the open-xiaoai client to dial in; probe() and the method surface were still exercised"
+    },
+    {
+      "id": "poll.drain_signals",
+      "status": "PASS",
+      "detail": "returned 0 event(s) twice in 0.0 ms"
+    },
+    {
+      "id": "poll.drain_wakes",
+      "status": "PASS",
+      "detail": "returned 0 event(s) twice in 0.0 ms"
+    },
+    {
+      "id": "wake.inject",
+      "status": "SKIP",
+      "detail": "device_wake is not effective (manifest/probe); no safe wake injection"
+    },
+    {
+      "id": "lifecycle.close",
+      "status": "PASS",
+      "detail": "close() is idempotent"
+    },
+    {
+      "id": "lifecycle.after_close",
+      "status": "PASS",
+      "detail": "drain_wakes() is empty after close()"
+    }
+  ],
+  "summary": {
+    "pass": 16,
+    "fail": 0,
+    "warn": 0,
+    "skip": 5,
+    "verdict": "pass"
+  },
+  "warnings": [],
+  "notes": [
+    "Generated locally with rui 0.6.0 (pip -e checkout at commit 4f00ef5) via:",
+    "  PYTHONPATH=src python -m rui plug-test src/rui_xiaoai_bridge --adapter rui_xiaoai_bridge.adapter:build --json",
+    "The 5 SKIPs are the inbound LX06 surface: open()/capture/playback need the real open-xiaoai client to dial in."
+  ],
+  "upstream_pin": {
+    "note": "Host rui release used for this report. The bridge declares rui_compat '>=0.6.0 <0.7.0'; deploy/downstream pins the same digest.",
+    "base": "ghcr.io/yes999zc/rui@sha256:abef1f276c3c21e9155d97c98913ee6c2e98fdfe842e43b90f64a5db6c12b241",
+    "reference": "ghcr.io/yes999zc/rui:0.6.0@sha256:abef1f276c3c21e9155d97c98913ee6c2e98fdfe842e43b90f64a5db6c12b241",
+    "tag": "0.6.0",
+    "release": "https://github.com/yes999zc/rui/releases/tag/v0.6.0",
+    "platforms": [
+      "linux/amd64",
+      "linux/arm64"
+    ],
+    "pinned_in": [
+      "deploy/downstream/Dockerfile",
+      "deploy/downstream/docker-compose.yml"
+    ],
+    "pinned_at": "2026-10-26",
+    "plugin_version": "0.1.0"
+  }
+}

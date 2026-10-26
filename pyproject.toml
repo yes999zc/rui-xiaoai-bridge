@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rui-xiaoai-bridge"
+version = "0.1.0"
+description = "Xiaomi AI Speaker Pro (LX06) as a rui satellite: Socket & Plug v1 adapter"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "websockets>=13",
+]
+
+[project.optional-dependencies]
+# rui is the *host*: the adapter runs in-process inside the official rui image and
+# imports rui.config / rui.device / rui.secrets. Do not install the PyPI `rui`
+# project here - it is unrelated. Tests that need rui declare it in CI.
+dev = ["pytest>=8", "ruamel.yaml>=0.18", "ruff>=0.5"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# The manifest is the load contract: rui's RUI_PLUGINS_DIR scan, the co-located
+# manifest lookup and the data-dir install all read plugin.yaml + devices/*.yaml
+# next to the package. An sdist/wheel without package-data would silently drop it.
+[tool.setuptools.package-data]
+rui_xiaoai_bridge = ["plugin.yaml", "devices/*.yaml"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]  # same as rui's config; long lines are reviewed, not reformatted
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"

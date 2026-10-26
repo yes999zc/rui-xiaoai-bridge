@@ -1,0 +1,20 @@
+schema: rui-plugin/v0
+id: xiaoai-lx06
+name: "Xiaomi AI Speaker Pro (LX06)"
+version: 0.1.0
+# The bridge is an in-process adapter: it imports rui's device/config contracts and
+# runs inside the audio plane. 0.6.x is the verified window; 0.7.0 is the earliest
+# the in-tree reference copy and adapter_aliases.py may go away, so leaving the
+# ceiling above the 0.6 line keeps one release of overlap.
+rui_compat: ">=0.6.0 <0.7.0"
+license: MIT
+maintainer: "rui-xiaoai-bridge maintainers"
+homepage: "https://github.com/yes999zc/rui-xiaoai-bridge"
+# Out-of-tree install: the operator either puts this directory under
+# RUI_PLUGINS_DIR (image/builtin root) or copies the manifest into
+# <data_dir>/plugs/xiaoai-lx06 and names the adapter via RUI_ADAPTER_PLUGINS.
+# trust=trusted is what lets the loader/registry execute it in-process; it is
+# self-asserted metadata, not a sandbox - see README "Trust and install paths".
+trust: trusted
+devices:
+  - devices/lx06.yaml
