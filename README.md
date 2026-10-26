@@ -8,7 +8,9 @@
 
 > **状态：Phase 1（脚手架 + 可加载）· 2026-10-26**
 > 本仓库已是 LX06 adapter 的独立实现，manifest 能被 rui 0.6.0 的 loader 解析，
-> adapter 通过官方 `rui plug-test`（**16 PASS / 0 FAIL / 0 WARN / 5 SKIP**，
+> adapter 通过官方 `rui plug-test`（rui 0.6.0 main `4f00ef5`：**16 PASS / 0 FAIL /
+> 0 WARN / 5 SKIP**；发布 tag `v0.6.0`：15 PASS / 0 FAIL / 1 WARN / 5 SKIP，
+> WARN 是 kit 用假 config 时 `probe_layout` 读不到 manifest `audio_defaults`，非 adapter 失败。
 > 见 [docs/contract-report-0.6.0.json](docs/contract-report-0.6.0.json)）。
 > 但 rui 0.6.x 仍随镜像发布 in-tree 参考实现（`plugs/xiaoai/`），同 id 时它优先；
 > **Phase 2 删除 in-tree 之后，本仓库才是生产安装路径**。共存规则见下文。
@@ -40,7 +42,7 @@ LX06 (open-xiaoai client) ──ws://<rui-host>:4412/?token=***──▶ rui aud
 |---|---|---|
 | 插件版本 | `0.1.0` | 独立于 rui 版本，semver |
 | `rui_compat` | `>=0.6.0 <0.7.0` | 0.6.x 验证窗口；0.7 才允许删 in-tree / 别名 |
-| 实测 rui | `0.6.0` | [contract report](docs/contract-report-0.6.0.json) |
+| 实测 rui | `0.6.0`（main `4f00ef5` 与 tag `v0.6.0`） | [contract report](docs/contract-report-0.6.0.json) |
 | 设备契约 | `rui-device/v1` | inbound ws，8ch/48kHz 采集 + 2ch reference |
 | plugin id / device id | `xiaoai-lx06` / `lx06` | 配置里写 `adapter: lx06` |
 | 旧拼写 | `adapter: xiaoai` | 仅由 rui 0.6.x 的 `adapter_aliases.py` 提供，**本仓库不定义别名** |

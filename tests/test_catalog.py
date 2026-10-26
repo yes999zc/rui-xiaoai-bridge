@@ -21,11 +21,26 @@ import pytest
 
 rui = pytest.importorskip("rui", reason="rui's plug catalog/resolver is the contract under test")
 
-from rui.plugins import PlugCatalog, discover_plugins  # noqa: E402
-from rui.web.api.v2_api import _plug_error  # noqa: E402
+from rui.plugins import PlugCatalog, RuntimeMode, TrustLevel, discover_plugins  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 PLUG = REPO / "src" / "rui_xiaoai_bridge"
+
+
+def _available(plugin) -> bool:
+    """The `available` rule both /api/v1/plugs and /api/v2/plugins apply.
+
+    Kept local instead of importing a web-layer helper: the oldest rui in the
+    declared `rui_compat` window must be able to run this suite, and the console v2
+    module is newer than the 0.6.0 release tag. The real endpoint is exercised by the
+    Phase 1 acceptance run recorded in the rui plan document.
+    """
+    if plugin.trust not in (TrustLevel.BUILTIN, TrustLevel.TRUSTED):
+        return False
+    return all(
+        device.runtime is None or device.runtime.mode is not RuntimeMode.SIDECAR
+        for device in plugin.devices
+    )
 
 
 def _install_user_manifest(data_dir: Path) -> Path:
@@ -50,7 +65,7 @@ def test_user_install_is_source_user_and_available(tmp_path, monkeypatch) -> Non
     assert entry.source == "user"
     assert entry.plugin.trust.value == "trusted"
     # This is exactly what /api/v1/plugs and /api/v2/plugins use for `available`.
-    assert _plug_error(entry.plugin) == ""
+    assert _available(entry.plugin) is True
     assert entry.plugin.devices[0].id == "lx06"
     assert catalog.resolve(adapter="lx06").source == "user"
 

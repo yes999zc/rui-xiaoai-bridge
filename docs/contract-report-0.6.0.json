@@ -145,7 +145,11 @@
   "notes": [
     "Generated locally with rui 0.6.0 (pip -e checkout at commit 4f00ef5) via:",
     "  PYTHONPATH=src python -m rui plug-test src/rui_xiaoai_bridge --adapter rui_xiaoai_bridge.adapter:build --json",
-    "The 5 SKIPs are the inbound LX06 surface: open()/capture/playback need the real open-xiaoai client to dial in."
+    "The 5 SKIPs are the inbound LX06 surface: open()/capture/playback need the real open-xiaoai client to dial in.",
+    "Cross-check on the released v0.6.0 tag (what CI installs): 15 PASS / 0 FAIL / 1 WARN / 5 SKIP.",
+    "The WARN is device.probe_layout: the v0.6.0 release kit builds the adapter with a fake config that does not",
+    "resolve the manifest's audio_defaults, so probe() reports 1 mic / 0 ref; it is a kit/config artifact, not an",
+    "adapter failure, and the same check is PASS on main @ 4f00ef5 (report above)."
   ],
   "upstream_pin": {
     "note": "Host rui release used for this report. The bridge declares rui_compat '>=0.6.0 <0.7.0'; deploy/downstream pins the same digest.",
