@@ -3,10 +3,10 @@ id: xiaoai-lx06
 name: "Xiaomi AI Speaker Pro (LX06)"
 version: 0.1.0
 # The bridge is an in-process adapter: it imports rui's device/config contracts and
-# runs inside the audio plane. 0.6.x is the verified window; 0.7.0 is the earliest
-# the in-tree reference copy and adapter_aliases.py may go away, so leaving the
-# ceiling above the 0.6 line keeps one release of overlap.
-rui_compat: ">=0.6.0 <0.7.0"
+# runs inside the audio plane. 0.7.x is the verified window; the ceiling tracks the
+# 0.7 line so a minor bump does not refuse the plug, while the floor stays at the
+# first release that shipped rui-device/v1 audio_defaults.
+rui_compat: ">=0.6.0 <0.8.0"
 license: MIT
 maintainer: "rui-xiaoai-bridge maintainers"
 homepage: "https://github.com/yes999zc/rui-xiaoai-bridge"

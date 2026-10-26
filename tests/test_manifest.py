@@ -1,7 +1,7 @@
 """The shipped manifest is the load contract: rui's own loader must accept it.
 
 The assertions pin the fields the out-of-tree split depends on: the plugin id, the
-0.6.x compatibility window, the inbound device id, the entrypoint that points at
+0.7.x compatibility window, the inbound device id, the entrypoint that points at
 *this* package, and the hardware audio defaults the in-tree copy used to bake into
 the core.
 """
@@ -25,7 +25,7 @@ def test_manifest_loads_through_rui_loader() -> None:
     assert plugin.id == "xiaoai-lx06"
     assert plugin.version == "0.1.0"
     assert plugin.trust is TrustLevel.TRUSTED
-    assert plugin.rui_compat == ">=0.6.0 <0.7.0"
+    assert plugin.rui_compat == ">=0.6.0 <0.8.0"
     assert plugin.license == "MIT"
     assert plugin.source_dir == PLUG.resolve()
     assert len(plugin.devices) == 1
