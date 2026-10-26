@@ -3,6 +3,25 @@
 All notable changes to **rui-xiaoai-bridge** are documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-10-26
+
+### Fixed
+
+- **连接替换后播放器不复位**（rui#25 / xiaoai#1）：设备重连时旧 socket 被替换，但
+  `_playing` / `consumed` / `sink_generation` 仍停留在旧代际，新连接的首个 `play()` 跳过
+  `start_play`——表现为重连后整首歌静音、或被误判为「已播完」。现在替换连接时统一
+  `_reset_media_state()`；挂起的旧 `play()` 也不会复活旧代际，旧 socket 的 `consumed`
+  事件不再推进新队列。
+- 镜像 house-ear 的修复（house `4468521`、本仓 `8f3ac46`）；`rui_compat` 维持
+  `">=0.6.0 <0.8.0"`，版本 0.2.1 → **0.2.2**。
+
+### Verified
+
+- 新增四条 fake 连接测试：① mid-play 替换后新连接首个 `play()` 必发 `start_play`；
+  ② 旧 handler 的 `finally` 不会清掉新连接状态；③ 卡在 `start_play` 的旧 `play()`
+  在替换后不会复活旧代际；④ 旧连接替换后发来的 `consumed` 不推进新玩家。
+- `PYTHONPATH=src pytest -q` → 13 passed；`ruff check src tests` 绿。
+
 ## [0.2.1] - 2026-10-26
 
 ### Changed

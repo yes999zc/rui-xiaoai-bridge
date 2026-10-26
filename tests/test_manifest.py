@@ -23,7 +23,7 @@ def test_manifest_loads_through_rui_loader() -> None:
     plugin = load_plugin(PLUG)
 
     assert plugin.id == "xiaoai-lx06"
-    assert plugin.version == "0.2.1"
+    assert plugin.version == "0.2.2"
     assert plugin.trust is TrustLevel.TRUSTED
     assert plugin.rui_compat == ">=0.6.0 <0.8.0"
     assert plugin.license == "MIT"

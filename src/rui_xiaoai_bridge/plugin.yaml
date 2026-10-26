@@ -1,7 +1,7 @@
 schema: rui-plugin/v0
 id: xiaoai-lx06
 name: "Xiaomi AI Speaker Pro (LX06)"
-version: 0.2.1
+version: 0.2.2
 # The bridge is an in-process adapter: it imports rui's device/config contracts and
 # runs inside the audio plane. 0.7.x is the verified window; the ceiling tracks the
 # 0.7 line so a minor bump does not refuse the plug, while the floor stays at the

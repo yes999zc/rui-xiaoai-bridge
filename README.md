@@ -7,7 +7,7 @@
 
 [![License: MIT](https://img.shields.io/github/license/yes999zc/rui-xiaoai-bridge?style=flat-square)](LICENSE)
 [![rui](https://img.shields.io/badge/rui-%3E%3D0.6.0%20%3C0.8.0-2f6f6a)](https://github.com/yes999zc/rui)
-[![plugin](https://img.shields.io/badge/plugin-0.2.1-b4744a)](src/rui_xiaoai_bridge/plugin.yaml)
+[![plugin](https://img.shields.io/badge/plugin-0.2.2-b4744a)](src/rui_xiaoai_bridge/plugin.yaml)
 
 </div>
 
@@ -45,9 +45,9 @@ rui 起一个音频平面 → 插件按 rui-device/v1 提供上下行 → 说「
 ## 三行启动
 
 ```bash
-git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
+git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
 bash deploy/install-plug-manifest.sh          # 把 plugin.yaml + adapter 安装到 rui 的插件目录
-PYTHONPATH=src python -m pytest -q            # 契约测试（9 项）
+PYTHONPATH=src python -m pytest -q            # 契约测试（9 项）+ 重连复位（4 项）
 rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契约自测
 ```
 
@@ -58,10 +58,10 @@ rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契�
 把下面这段贴给任意 AI 助手：
 
 ```text
-目标：用 Docker 跑起 rui 0.7.2 + 本插件 0.2.1（adapter id = lx06）。
+目标：用 Docker 跑起 rui 0.7.4 + 本插件 0.2.2（adapter id = lx06）。
 前置：docker compose version 通过；8080 空闲；5 GB 磁盘。
-1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.2
-2) git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
+1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.4
+2) git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) 写 ./config/config.yaml（web.auth_token + devices[]，含 lx06 的 host/listen_port）
 5) export RUI_DEVICE_TOKEN=<设备令牌>; docker compose up -d
@@ -72,7 +72,7 @@ rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契�
 
 ## 兼容性与前置条件
 
-- `rui` **>=0.6.0 <0.8.0**；本版通过 **9 项插件契约测试**，LX06 真机指标为 **2026-10-24 历史实测**（0.7.2 未复测）。Python **3.11+**。
+- `rui` **>=0.6.0 <0.8.0**；本版通过 **9 条插件契约测试 + 4 条重连复位测试**，LX06 真机指标为 **2026-10-24 历史实测**（0.7.2 未复测）。Python **3.11+**。
 - **设备前置条件**（第三方设备，与厂商**无官方关联**）：
   - 小米 AI 音箱 Pro（LX06），固件需已具备设备本地接口，并与 rui 主机在同一局域网；
   - 设备令牌（`RUI_DEVICE_TOKEN` 或插件配置里的 `token_env`）由你提供；
@@ -152,9 +152,9 @@ Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports 
 ## Three-line quickstart
 
 ```bash
-git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
+git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
 bash deploy/install-plug-manifest.sh          # installs plugin.yaml + adapter into rui's plug dir
-PYTHONPATH=src python -m pytest -q            # contract tests (9)
+PYTHONPATH=src python -m pytest -q            # contract tests (9) + reconnect reset (4)
 rui plug-test <plugin-dir> --adapter rui_xiaoai_bridge.adapter:build   # contract self-test
 ```
 
@@ -165,10 +165,10 @@ Restart rui, then add the LX06 on the console's Devices page (address + token), 
 Paste this:
 
 ```text
-Goal: run rui 0.7.2 + this plug 0.2.1 (adapter id = lx06) with Docker.
+Goal: run rui 0.7.4 + this plug 0.2.2 (adapter id = lx06) with Docker.
 Preflight: docker compose version; port 8080 free; 5 GB disk.
-1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.2
-2) git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
+1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.4
+2) git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) write ./config/config.yaml (web.auth_token + devices[] with host/listen_port for lx06)
 5) export RUI_DEVICE_TOKEN=<device token>; docker compose up -d
@@ -179,7 +179,7 @@ No ffmpeg build needed (the image ships it)
 
 ## Compatibility and prerequisites
 
-- `rui` **>=0.6.0 <0.8.0**; this release passes the **9 plugin contract tests**, and the LX06 device numbers are **historical (2026-10-24)** — not re-measured on 0.7.2. Python **3.11+**.
+- `rui` **>=0.6.0 <0.8.0**; this release passes **9 plugin contract tests + 4 reconnect-reset tests**, and the LX06 device numbers are **historical (2026-10-24)** — not re-measured on 0.7.2. Python **3.11+**.
 - **Device prerequisites** (third-party hardware, **not affiliated with any vendor**):
   - Xiaomi AI Speaker Pro (LX06) with firmware that already exposes the device's local interface, on the same LAN as the rui host;
   - a device token (`RUI_DEVICE_TOKEN`, or the `token_env` value in the plug config) that you provide;
