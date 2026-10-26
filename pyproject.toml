@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rui-xiaoai-bridge"
-version = "0.1.0"
+version = "0.2.0"
 description = "Xiaomi AI Speaker Pro (LX06) as a rui satellite: Socket & Plug v1 adapter"
 readme = "README.md"
 license = { text = "MIT" }
