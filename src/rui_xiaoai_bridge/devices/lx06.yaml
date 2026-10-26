@@ -9,8 +9,8 @@
 # the manifest must never declare device_wake / barge_via_device. RUI still owns the
 # final turn/barge decision.
 schema: rui-device/v1
-# Canonical adapter name. The 0.6.x alias for the pre-0.6 spelling (`xiaoai`) still
-# lives in rui's adapter_aliases.py; this repository does not define aliases.
+# Canonical adapter name. A pre-0.7.6 config spelling is rewritten by rui's config
+# migration; this repository does not define aliases.
 id: lx06
 model: "LX06"
 name: "Xiaomi AI Speaker Pro (LX06)"
@@ -19,6 +19,9 @@ class: A
 transport: inbound
 protocol: {kind: ws, version: "1"}
 capabilities: [mic_array, reference, playback, led, keys, volume]
+# Phrases this speaker's own assistant says (or echoes back) that must early-yield a
+# turn. The core matches them generically; the plug names the actual strings.
+wake_words_residual: ["小爱同学", "小爱", "小爱小爱"]
 # What the core used to bake into CaptureConfig (0.5 and earlier): S32_LE, 8
 # interleaved channels at 48 kHz, ch0..ch5 mics, ch6/ch7 playback reference, and the
 # measured shifts. This is the bottom layer of the audio merge: a config that states

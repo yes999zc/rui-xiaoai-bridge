@@ -67,3 +67,24 @@ def test_audio_defaults_and_entrypoint_are_preserved() -> None:
     assert runtime.entrypoint == "rui_xiaoai_bridge.adapter:build"
     assert runtime.listen_port == 4412
     assert runtime.token_env == "RUI_DEVICE_TOKEN"
+
+
+def test_residual_wake_words_are_declared_by_the_device() -> None:
+    from rui.web.api.app import _wake_backstop
+
+    device = load_plugin(PLUG).devices[0]
+    assert device.wake_words_residual == ["小爱同学", "小爱", "小爱小爱"]
+    assert _wake_backstop("小爱同学，放首歌", [], device.wake_words_residual) == "小爱同学"
+
+
+def test_no_residual_words_means_no_backstop() -> None:
+    """New 0.7.6 semantics: an undeclared manifest gets no vendor-phrase backstop."""
+    from rui.web.api.app import _wake_backstop
+
+    assert _wake_backstop("小爱同学，放首歌", ["hello"], []) == ""
+
+
+def test_residual_words_yield_even_with_empty_configured_wake_words() -> None:
+    from rui.web.api.app import _wake_backstop
+
+    assert _wake_backstop("小爱放首歌", [], ["小爱"]) == "小爱"
