@@ -15,5 +15,6 @@ htmlcov/
 # Local secrets: never commit credentials or private keys
 .env
 .env.*
+!.env.example
 *.pem
 *.key
