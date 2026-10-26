@@ -64,9 +64,10 @@ rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契�
 2) git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) 写 ./config/config.yaml（web.auth_token + devices[]，含 lx06 的 host/listen_port）
-5) export RUI_DEVICE_TOKEN=<设备令牌>; docker compose up -d
-6) 验收：/health 的 adapter_plugins.registered 必须含 "lx06"、devices 正确、device_errors=0
-失败看：docker compose logs --tail=80 rui 的 config error / adapter / TLS；回滚：down 后换回上一版 image tag
+5) TLS（同 compose 里 dot2 的 tls_port 开启时必需；只接 lx06 可跳过）：原 controller 证书放 ./secrets/，没有就运行 `bash ../../scripts/make_dev_tls.sh`。自签只保证平面能起，真机信任取决于设备 CA
+6) export RUI_DEVICE_TOKEN=<设备令牌>; docker compose up -d
+7) 验收：/health 的 adapter_plugins.registered 必须含 "lx06"、devices 正确、device_errors=0
+失败看：docker compose logs --tail=80 rui 的 config error / adapter / TLS；回滚：down 后换回上一版 image tag；TLS 失败先移走 ./secrets/ 排查
 不需要自己编译 ffmpeg（镜像已内置）
 ```
 
@@ -171,9 +172,10 @@ Preflight: docker compose version; port 8080 free; 5 GB disk.
 2) git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) write ./config/config.yaml (web.auth_token + devices[] with host/listen_port for lx06)
-5) export RUI_DEVICE_TOKEN=<device token>; docker compose up -d
-6) verify: /health adapter_plugins.registered contains "lx06", devices correct, device_errors=0
-On failure: docker compose logs --tail=80 rui (config error / adapter / TLS); rollback: down and switch the image tag back
+5) TLS (required only when dot2's tls_port is on in the same compose; skip for lx06-only): put the original controller cert into ./secrets/, or run `bash ../../scripts/make_dev_tls.sh`. Self-signed only proves the plane starts; the device's trusted CA decides acceptance
+6) export RUI_DEVICE_TOKEN=<device token>; docker compose up -d
+7) verify: /health adapter_plugins.registered contains "lx06", devices correct, device_errors=0
+On failure: docker compose logs --tail=80 rui (config error / adapter / TLS); rollback: down and switch the image tag back; for TLS failures move ./secrets/ away first
 No ffmpeg build needed (the image ships it)
 ```
 
