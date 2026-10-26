@@ -60,7 +60,7 @@ rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契�
 ```text
 目标：用 Docker 跑起 rui 0.7.2 + 本插件 0.2.1（adapter id = lx06）。
 前置：docker compose version 通过；8080 空闲；5 GB 磁盘。
-1) git clone --branch v0.7.2 https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers
+1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.2
 2) git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) 写 ./config/config.yaml（web.auth_token + devices[]，含 lx06 的 host/listen_port）
@@ -167,7 +167,7 @@ Paste this:
 ```text
 Goal: run rui 0.7.2 + this plug 0.2.1 (adapter id = lx06) with Docker.
 Preflight: docker compose version; port 8080 free; 5 GB disk.
-1) git clone --branch v0.7.2 https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers
+1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.2
 2) git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) write ./config/config.yaml (web.auth_token + devices[] with host/listen_port for lx06)
