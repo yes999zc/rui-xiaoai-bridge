@@ -14,8 +14,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Verified
 
-- 历史实测：唤醒 19/20、播放中打断停播延迟 205.2 ms。
+- 9 项插件契约测试通过（`rui plug-test`，见 README）。
 - 其余能力（语音指令成功率、音量、指示灯、多设备并发）**未测**。
+
+### Historical measurements (2026-10-24, not re-tested)
+
+- 唤醒 19/20；播放中打断停播延迟 205.2 ms（**stop-push 判据**；当日三轮 24.2/64.5/205.2，max n=3）。
+- 来自 2026-10-24 的真机轮次，0.7.2 / 0.7.3 未复测；引用时必须带日期与分母。
 
 ## [0.2.0] - 2026-10-25
 

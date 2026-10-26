@@ -87,7 +87,7 @@ rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契�
 | 能力 | 状态 |
 |---|---|
 | 唤醒（服务端中文 KWS） | 19/20（历史实测） |
-| 播放中打断 | 停播延迟 205.2 ms（历史实测） |
+| 播放中打断 | 停播延迟 205.2 ms（历史实测；**stop-push 判据**，非声学端到端；三轮 24.2/64.5/205.2，max n=3） |
 | 语音指令 | 未测（回归项，未单独统计） |
 | 音量控制 | 未测 |
 | 指示灯 | 未测 |
@@ -194,7 +194,7 @@ No ffmpeg build needed (the image ships it)
 | Capability | Status |
 |---|---|
 | Wake (server-side Chinese KWS) | 19/20 (historical) |
-| Barge-in during playback | 205.2 ms stop latency (historical) |
+| Barge-in during playback | 205.2 ms stop latency (historical; **stop-push criterion**, not acoustical end-to-end; three runs 24.2/64.5/205.2, max n=3) |
 | Voice commands | untested |
 | Volume control | untested |
 | LED | untested |
