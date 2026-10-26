@@ -5,7 +5,6 @@
 **把小米 AI 音箱 Pro（LX06）作为 [rui](https://github.com/yes999zc/rui) 的语音卫星接入，不 fork 核心。**
 一个 out-of-tree 的 Socket & Plug v1 设备插件：`plugin.yaml` + `rui-device/v1` 清单 + 进程内 adapter 包。
 
-[![CI](https://github.com/yes999zc/rui-xiaoai-bridge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yes999zc/rui-xiaoai-bridge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/github/license/yes999zc/rui-xiaoai-bridge?style=flat-square)](LICENSE)
 [![rui](https://img.shields.io/badge/rui-%3E%3D0.6.0%20%3C0.8.0-2f6f6a)](https://github.com/yes999zc/rui)
 [![plugin](https://img.shields.io/badge/plugin-0.2.1-b4744a)](src/rui_xiaoai_bridge/plugin.yaml)
@@ -28,17 +27,17 @@ rui 起一个音频平面 → 插件按 rui-device/v1 提供上下行 → 说「
 
 ![architecture](docs/assets/architecture.png)
 
-源文件：[`docs/assets/architecture.mmd`](docs/assets/architecture.mmd)；导出物 [`architecture.svg`](docs/assets/architecture.svg) / [`architecture.png`](docs/assets/architecture.png)。
+源文件：[`docs/assets/architecture.mmd`](docs/assets/architecture.mmd)；导出物 [`architecture.svg`](docs/assets/architecture.svg) / [`architecture.png`](docs/assets/architecture.png)。桥仓无界面，hero 即这张架构图。
 
 | 层 | 在这个仓库里的东西 | 说明 |
 |---|---|---|
 | **rui 核心（不改）** | 会话/回合、供应商、唤醒仲裁、音频门限 | 用官方镜像，不补丁、不 fork |
-| **本仓库（插件）** | `adapter`（`build()` 入口）、`plugin.yaml`（契约窗口）、`devices/lx06.yaml` | `rui_compat: >=0.6.0 <0.8.0`；越界时 loader 会拒载 |
+| **本仓库（插件）** | `adapter`（`build()` 入口）、`plugin.yaml`（契约窗口）、`devices/lx06.yaml` | `rui_compat: >=0.6.0 <0.8.0`；越界时 loader 会拒载。桥仓无界面，hero 即这张架构图 |
 | **设备** | LX06：入站音频上行、喇叭、LED、按键 | 设备侧 AEC 归设备 |
 
 ## 特性
 
-- **纯 out-of-tree**：核心通过 manifest 的 `runtime.entrypoint` 加载，插件放在 `RUI_PLUGINS_DIR` 或 `<data_dir>/plugs/xiaoai-lx06` 即可。
+- **纯 out-of-tree**：核心通过 manifest 的 `runtime.entrypoint` 加载，插件放在 `RUI_PLUGINS_DIR` 或 `<data_dir>/plugs/xiaoai-lx06` 即可；核心只有 0.6→0.7 的临时 adapter 别名，没有设备实现。
 - **契约优先**：设备清单遵循 `rui-device/v1`；`rui_compat` 明确声明支持的 rui 版本窗口。
 - **入站设备模型**：设备把音频推到已注册的监听端口（`listen_port`），插件在音频平面内完成上下行与事件处理。
 - **可观测**：`rui plug-test` 跑契约自测；设备状态与重连进 rui 的日志与轨迹。
@@ -49,13 +48,14 @@ rui 起一个音频平面 → 插件按 rui-device/v1 提供上下行 → 说「
 git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
 bash deploy/install-plug-manifest.sh          # 把 plugin.yaml + adapter 安装到 rui 的插件目录
 PYTHONPATH=src python -m pytest -q            # 契约测试（9 项）
+rui plug-test <插件目录>   # 契约自测（directory 必填，--adapter 指定入口）
 ```
 
 安装后重启 rui，在控制台「设备」页添加 LX06，填入设备地址与令牌；也可以直接在 `config.yaml` 的 `devices[]` 里加一条。
 
 ## 兼容性与前置条件
 
-- `rui` **>=0.6.0 <0.8.0**（本版在 0.7.2 上验证）；Python **3.11+**。
+- `rui` **>=0.6.0 <0.8.0**；本版通过 **9 项插件契约测试**，LX06 真机指标为 **2026-10-24 历史实测**（0.7.2 未复测）。Python **3.11+**。
 - **设备前置条件**（第三方设备，与厂商**无官方关联**）：
   - 小米 AI 音箱 Pro（LX06），固件需已具备设备本地接口，并与 rui 主机在同一局域网；
   - 设备令牌（`RUI_DEVICE_TOKEN` 或插件配置里的 `token_env`）由你提供；
@@ -83,7 +83,7 @@ PYTHONPATH=src python -m pytest -q            # 契约测试（9 项）
 | 插件未被加载 | manifest 不在插件目录，或 `rui_compat` 越界 | 看 rui 启动日志里的 manifest 报错；确认 rui 版本在窗口内 |
 | 设备一直离线 | 端口不可达 / 令牌不匹配 | 确认 `listen_port` 可达；`token_env` 指向的环境变量有值 |
 | 能唤醒但不回话 | 音频上行或播放下行不通 | 看音频平面的 `[seg]` 与播放日志；确认设备侧 AEC 正常 |
-| 与另一台音箱抢答 | 两台都在同一房间且先后被唤醒 | 分到不同房间；跨房间现在互不影响 |
+| 与另一台音箱抢答 | 两台都在同一房间且先后被唤醒 | 分到不同房间；跨房间的播放与回合仲裁互不影响（runner 仍单会话） |
 | `plug-test` 失败 | rui 版本或插件目录不对 | 在 rui 容器内跑 `rui plug-test`，按失败项逐个修 |
 
 ## 已知限制
@@ -117,7 +117,7 @@ rui starts an audio plane → the plug provides uplink/downlink per rui-device/v
 
 ![architecture](docs/assets/architecture.png)
 
-Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports [`architecture.svg`](docs/assets/architecture.svg) / [`architecture.png`](docs/assets/architecture.png).
+Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports [`architecture.svg`](docs/assets/architecture.svg) / [`architecture.png`](docs/assets/architecture.png). A bridge has no UI, so this diagram is the hero.
 
 | Layer | What lives here | Notes |
 |---|---|---|
@@ -127,7 +127,7 @@ Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports 
 
 ## Features
 
-- **Pure out-of-tree**: the core loads it via the manifest's `runtime.entrypoint`; drop it under `RUI_PLUGINS_DIR` or `<data_dir>/plugs/xiaoai-lx06`.
+- **Pure out-of-tree**: the core loads it via the manifest's `runtime.entrypoint`; drop it under `RUI_PLUGINS_DIR` or `<data_dir>/plugs/xiaoai-lx06`. The core carries only a temporary 0.6→0.7 adapter alias, no device implementation.
 - **Contract first**: the device manifest follows `rui-device/v1` and declares the supported rui window in `rui_compat`.
 - **Inbound device model**: the device pushes audio to a registered listen port; the plug handles uplink/downlink and events inside the audio plane.
 - **Observability**: `rui plug-test` runs the contract suite; device state and reconnects land in rui logs and traces.
@@ -138,13 +138,14 @@ Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports 
 git clone --branch v0.2.1 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
 bash deploy/install-plug-manifest.sh          # installs plugin.yaml + adapter into rui's plug dir
 PYTHONPATH=src python -m pytest -q            # contract tests (9)
+rui plug-test <plugin-dir>   # contract self-test (directory required; --adapter selects the entry)
 ```
 
 Restart rui, then add the LX06 on the console's Devices page (address + token), or append an entry to `devices[]` in `config.yaml`.
 
 ## Compatibility and prerequisites
 
-- `rui` **>=0.6.0 <0.8.0** (validated on 0.7.2); Python **3.11+**.
+- `rui` **>=0.6.0 <0.8.0**; this release passes the **9 plugin contract tests**, and the LX06 device numbers are **historical (2026-10-24)** — not re-measured on 0.7.2. Python **3.11+**.
 - **Device prerequisites** (third-party hardware, **not affiliated with any vendor**):
   - Xiaomi AI Speaker Pro (LX06) with firmware that already exposes the device's local interface, on the same LAN as the rui host;
   - a device token (`RUI_DEVICE_TOKEN`, or the `token_env` value in the plug config) that you provide;
@@ -172,7 +173,7 @@ Restart rui, then add the LX06 on the console's Devices page (address + token), 
 | Plug never loads | Manifest missing from the plug dir, or `rui_compat` out of range | Read the manifest error in rui's startup log; confirm the rui version |
 | Device stays offline | Port unreachable, or token mismatch | Check the listen port and that `token_env` points at a value |
 | Wakes but never answers | Uplink or playback downlink is broken | Inspect `[seg]` and playback lines in the audio plane logs; verify device AEC |
-| Two speakers talk over each other | Both in the same room and woken in sequence | Put them in different rooms; cross-room is isolated now |
+| Two speakers talk over each other | Both in the same room and woken in sequence | Put them in different rooms; cross-room playback and turn arbitration are isolated (the runner is still single-session) |
 | `plug-test` fails | Wrong rui version or plug path | Run `rui plug-test` inside the rui container and fix the failing items |
 
 ## Known limitations

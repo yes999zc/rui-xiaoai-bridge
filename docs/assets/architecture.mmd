@@ -1,31 +1,29 @@
 %% rui-xiaoai-bridge — where this plug sits (source for docs/assets/architecture.svg / .png)
 %% palette: ink #1f2a2e, teal #2f6f6a, sand #e8e2d6, accent #b4744a
+%%{init: {'themeVariables': {'fontSize': '16px', 'fontFamily': 'Helvetica Neue, Arial, sans-serif'}, 'flowchart': {'htmlLabels': false, 'curve': 'basis', 'nodeSpacing': 40, 'rankSpacing': 70}}}%%
 flowchart LR
-  classDef svc fill:#e8e2d6,stroke:#2f6f6a,stroke-width:1.5px,color:#1f2a2e
-  classDef plug fill:#f4efe6,stroke:#b4744a,stroke-width:1.5px,color:#1f2a2e
-  classDef dev fill:#ffffff,stroke:#1f2a2e,stroke-width:1.5px,color:#1f2a2e
+  classDef svc fill:#e8e2d6,stroke:#2f6f6a,stroke-width:2px,color:#1f2a2e
+  classDef plug fill:#f4efe6,stroke:#b4744a,stroke-width:2px,color:#1f2a2e
+  classDef dev fill:#ffffff,stroke:#1f2a2e,stroke-width:2px,color:#1f2a2e
 
-  subgraph R["rui core · unchanged"]
+  subgraph R["1 · rui core"]
     direction TB
-    C["session / turn<br/>providers · arbiter"]:::svc
-    G["audio gate<br/>VAD · preroll · echo excision"]:::svc
+    C["Session / turn"]:::svc
+    G["Audio gate"]:::svc
   end
 
-  subgraph P["rui-xiaoai-bridge · this repo"]
+  subgraph P["2 · this plug"]
     direction TB
-    A["adapter<br/>rui-device/v1 build()"]:::plug
-    M["plugin.yaml + manifest<br/>rui_compat window"]:::plug
+    A["adapter<br/>rui-device/v1"]:::plug
+    MF["plugin.yaml<br/>rui_compat"]:::plug
   end
 
-  subgraph H["Xiaomi AI Speaker Pro · LX06"]
+  subgraph H["3 · LX06"]
     direction TB
-    I["inbound audio uplink"]:::dev
-    S["speaker + LED + keys"]:::dev
+    I["inbound uplink"]:::dev
+    S["speaker · LED"]:::dev
   end
 
-  A -->|"wake candidate, utterances"| G
-  G -->|"play pcm, stop, volume"| A
-  C --- A
-  M -.->|"declares the contract"| A
-  I --> A
-  A --> S
+  R -->|"play · stop · volume"| P
+  P -->|"wake · utterance"| R
+  P <-->|"audio + events"| H
