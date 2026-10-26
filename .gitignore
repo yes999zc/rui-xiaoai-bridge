@@ -11,3 +11,9 @@ dist/
 .coverage
 htmlcov/
 .DS_Store
+
+# Local secrets: never commit credentials or private keys
+.env
+.env.*
+*.pem
+*.key
