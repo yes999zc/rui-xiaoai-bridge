@@ -37,7 +37,7 @@ rui 起一个音频平面 → 插件按 rui-device/v1 提供上下行 → 说「
 
 ## 特性
 
-- **纯 out-of-tree**：核心通过 manifest 的 `runtime.entrypoint` 加载，插件放在 `RUI_PLUGINS_DIR` 或 `<data_dir>/plugs/xiaoai-lx06` 即可；核心只有 0.6→0.7 的临时 adapter 别名，没有设备实现。
+- **纯 out-of-tree**：0.7.6 起核心不再内置设备实现，**本仓库是唯一来源**；插件目录挂到 `/opt/rui-plugins` 即可，没有内置回退、没有 adapter 别名（旧配置 `adapter: xiaoai` 只在读入时迁移为 `lx06` 并告警，0.8.0 删除）。
 - **契约优先**：设备清单遵循 `rui-device/v1`；`rui_compat` 明确声明支持的 rui 版本窗口。
 - **入站设备模型**：设备把音频推到已注册的监听端口（`listen_port`），插件在音频平面内完成上下行与事件处理。
 - **可观测**：`rui plug-test` 跑契约自测；设备状态与重连进 rui 的日志与轨迹。
@@ -46,40 +46,48 @@ rui 起一个音频平面 → 插件按 rui-device/v1 提供上下行 → 说「
 
 ```bash
 git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
-bash deploy/install-plug-manifest.sh          # 把 plugin.yaml + adapter 安装到 rui 的插件目录
-PYTHONPATH=src python -m pytest -q            # 契约测试（9 项）+ 重连复位（4 项）
-rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契约自测
+mkdir -p /vol1/rui/plugins && cp -r src/rui_xiaoai_bridge /vol1/rui/plugins/   # 宿主插件目录
+IMG=ghcr.io/yes999zc/rui@sha256:1f074bb3af1ef4854ef040b12c9146ed8a6ef2b1c4a5f6cc7858ac6ccac3ecaa
+docker run --rm -v /vol1/rui/plugins:/opt/rui-plugins:ro -e PYTHONPATH=/opt/rui-plugins \
+  --entrypoint rui "$IMG" plug-test /opt/rui-plugins/rui_xiaoai_bridge \
+  --adapter rui_xiaoai_bridge.adapter:build   # 契约自测
 ```
 
-安装后重启 rui，在控制台「设备」页添加 LX06，填入设备地址与令牌；也可以直接在 `config.yaml` 的 `devices[]` 里加一条。
+生产用 Compose：核心镜像 + `-v ./plugins:/opt/rui-plugins:ro` + `PYTHONPATH=/opt/rui-plugins` + `RUI_ADAPTER_PLUGINS=lx06=rui_xiaoai_bridge.adapter:build`，**不需要造下游镜像**。重启后在控制台「设备」页添加 LX06，或直接在 `config.yaml` 的 `devices[]` 里加一条。
 
 ## 让 AI 帮你装
 
 把下面这段贴给任意 AI 助手：
 
 ```text
-目标：用 Docker 跑起 rui 0.7.4 + 本插件 0.2.2（adapter id = lx06）。
+目标：用 Docker 跑起 rui 0.7.8 + 本插件 0.2.2（adapter id = lx06），核心镜像 + 外置插件目录，不造下游镜像。
 前置：docker compose version 通过；8080 空闲；5 GB 磁盘。
-1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.4
+1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像 pin 到 0.7.8 的 amd64 摘要
 2) git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) 写 ./config/config.yaml（web.auth_token + devices[]，含 lx06 的 host/listen_port）
 5) TLS（同 compose 里 dot2 的 tls_port 开启时必需；只接 lx06 可跳过）：原 controller 证书放 ./secrets/，没有就运行 `bash ../../scripts/make_dev_tls.sh`。自签只保证平面能起，真机信任取决于设备 CA
 6) export RUI_DEVICE_TOKEN=<设备令牌>; docker compose up -d
-7) 验收：/health 的 adapter_plugins.registered 必须含 "lx06"、devices 正确、device_errors=0
+7) 验收：/health 的 planes 里 lx06 为 running、devices 正确、device_errors=0（外置 catalog 插件不进 registered）
 失败看：docker compose logs --tail=80 rui 的 config error / adapter / TLS；回滚：down 后换回上一版 image tag；TLS 失败先移走 ./secrets/ 排查
 不需要自己编译 ffmpeg（镜像已内置）
 ```
 
 ## 兼容性与前置条件
 
-- `rui` **>=0.6.0 <0.8.0**；本版通过 **9 条插件契约测试 + 4 条重连复位测试**，LX06 真机指标为 **2026-10-24 历史实测**（0.7.2 未复测）。Python **3.11+**。
+- `rui` **>=0.6.0 <0.8.0**（本版面向 **0.7.8** 验证）；本版通过 **9 条插件契约测试 + 4 条重连复位测试**，LX06 真机指标为 **2026-10-24 历史实测**。Python **3.11+**。
+- 安装：核心镜像 + 外置插件目录（`/vol1/rui/plugins/rui_xiaoai_bridge`），挂载 `/opt/rui-plugins` 并设 `PYTHONPATH` + `RUI_ADAPTER_PLUGINS`；**不需要造下游镜像**。
 - **设备前置条件**（第三方设备，与厂商**无官方关联**）：
   - 小米 AI 音箱 Pro（LX06），固件需已具备设备本地接口，并与 rui 主机在同一局域网；
   - 设备令牌（`RUI_DEVICE_TOKEN` 或插件配置里的 `token_env`）由你提供；
   - 监听端口（默认 `4412`）需在 rui 主机上可达；
   - 本项目只提供软件侧桥接层；设备固件与网络准备由你按设备既有能力完成。
 - 唤醒与打断依赖 rui 服务端 KWS（中文），设备侧不做唤醒判定。
+
+| rui 核心 | 本插件 | 说明 |
+|---|---|---|
+| **0.7.8**（当前） | **0.2.2** | 推荐；核心 + 外置插件目录 |
+| 0.7.4（历史） | 0.2.2 | 外置插件同样可用 |
 
 ## 支持矩阵
 
@@ -105,6 +113,11 @@ rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build   # 契�
 | `plug-test` 失败 | rui 版本或插件目录不对 | 在 rui 容器内跑 `rui plug-test <插件目录> --adapter rui_xiaoai_bridge.adapter:build`，按失败项逐个修 |
 
 ## 已知限制
+
+- 未声明 `wake_words_residual` 的第三方清单不做 vendor 短语兜底。
+- 两音箱默认只起第一台设备的平面，需 `multi_device: {enabled: true, max_planes: 2}`。
+- 自签证书只保证平面能起，真机信任取决于设备 CA。
+
 
 - LX06 的关键指标只有历史实测（唤醒 19/20、打断 205.2 ms），**没有** 0.7.2 的复测数据。
 - 语音指令成功率、音量、指示灯、多设备并发均**未测**。
@@ -145,7 +158,7 @@ Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports 
 
 ## Features
 
-- **Pure out-of-tree**: the core loads it via the manifest's `runtime.entrypoint`; drop it under `RUI_PLUGINS_DIR` or `<data_dir>/plugs/xiaoai-lx06`. The core carries only a temporary 0.6→0.7 adapter alias, no device implementation.
+- **Pure out-of-tree**: since 0.7.6 the core ships no device implementation; **this repository is the only source**. Mount the plug directory at `/opt/rui-plugins`; there is no in-tree fallback and no adapter alias (a legacy `adapter: xiaoai` is migrated to `lx06` on load, removed in 0.8.0).
 - **Contract first**: the device manifest follows `rui-device/v1` and declares the supported rui window in `rui_compat`.
 - **Inbound device model**: the device pushes audio to a registered listen port; the plug handles uplink/downlink and events inside the audio plane.
 - **Observability**: `rui plug-test` runs the contract suite; device state and reconnects land in rui logs and traces.
@@ -154,40 +167,48 @@ Source: [`docs/assets/architecture.mmd`](docs/assets/architecture.mmd); exports 
 
 ```bash
 git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && cd rui-xiaoai-bridge
-bash deploy/install-plug-manifest.sh          # installs plugin.yaml + adapter into rui's plug dir
-PYTHONPATH=src python -m pytest -q            # contract tests (9) + reconnect reset (4)
-rui plug-test <plugin-dir> --adapter rui_xiaoai_bridge.adapter:build   # contract self-test
+mkdir -p /vol1/rui/plugins && cp -r src/rui_xiaoai_bridge /vol1/rui/plugins/   # host plug dir
+IMG=ghcr.io/yes999zc/rui@sha256:1f074bb3af1ef4854ef040b12c9146ed8a6ef2b1c4a5f6cc7858ac6ccac3ecaa
+docker run --rm -v /vol1/rui/plugins:/opt/rui-plugins:ro -e PYTHONPATH=/opt/rui-plugins \
+  --entrypoint rui "$IMG" plug-test /opt/rui-plugins/rui_xiaoai_bridge \
+  --adapter rui_xiaoai_bridge.adapter:build   # contract self-test
 ```
 
-Restart rui, then add the LX06 on the console's Devices page (address + token), or append an entry to `devices[]` in `config.yaml`.
+In production use Compose: core image + `-v ./plugins:/opt/rui-plugins:ro` + `PYTHONPATH=/opt/rui-plugins` + `RUI_ADAPTER_PLUGINS=lx06=rui_xiaoai_bridge.adapter:build`; **no downstream image is needed**. Restart, then add the LX06 on the Devices page or append an entry to `devices[]`.
 
 ## Let an AI install it
 
 Paste this:
 
 ```text
-Goal: run rui 0.7.4 + this plug 0.2.2 (adapter id = lx06) with Docker.
+Goal: run rui 0.7.8 + this plug 0.2.2 (adapter id = lx06) with Docker, using the core image plus an external plug directory (no downstream image).
 Preflight: docker compose version; port 8080 free; 5 GB disk.
-1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像仍 pin 在 0.7.4
+1) git clone --branch main https://github.com/yes999zc/rui.git && cd rui/examples/two-speakers   # main 才有本示例；镜像 pin 到 0.7.8 的 amd64 摘要
 2) git clone --branch v0.2.2 https://github.com/yes999zc/rui-xiaoai-bridge.git && git clone --branch v1.3.1 https://github.com/yes999zc/rui-dot2-bridge.git
 3) mkdir -p plugins && cp -r rui-xiaoai-bridge/src/rui_xiaoai_bridge plugins/   # 需要两台都接时，把另一个桥的 src 也 cp 进来
 4) write ./config/config.yaml (web.auth_token + devices[] with host/listen_port for lx06)
 5) TLS (required only when dot2's tls_port is on in the same compose; skip for lx06-only): put the original controller cert into ./secrets/, or run `bash ../../scripts/make_dev_tls.sh`. Self-signed only proves the plane starts; the device's trusted CA decides acceptance
 6) export RUI_DEVICE_TOKEN=<device token>; docker compose up -d
-7) verify: /health adapter_plugins.registered contains "lx06", devices correct, device_errors=0
+7) verify: /health.planes shows lx06 running, devices correct, device_errors=0 (external catalog plugs do not appear in registered)
 On failure: docker compose logs --tail=80 rui (config error / adapter / TLS); rollback: down and switch the image tag back; for TLS failures move ./secrets/ away first
 No ffmpeg build needed (the image ships it)
 ```
 
 ## Compatibility and prerequisites
 
-- `rui` **>=0.6.0 <0.8.0**; this release passes **9 plugin contract tests + 4 reconnect-reset tests**, and the LX06 device numbers are **historical (2026-10-24)** — not re-measured on 0.7.2. Python **3.11+**.
+- `rui` **>=0.6.0 <0.8.0** (this release is validated against **0.7.8**); this release passes **9 plugin contract tests + 4 reconnect-reset tests**, and the LX06 device numbers are **historical (2026-10-24)**. Python **3.11+**.
+- Install: core image + external plug directory (`/vol1/rui/plugins/rui_xiaoai_bridge`), mounted at `/opt/rui-plugins` with `PYTHONPATH` + `RUI_ADAPTER_PLUGINS`; **no downstream image is needed**.
 - **Device prerequisites** (third-party hardware, **not affiliated with any vendor**):
   - Xiaomi AI Speaker Pro (LX06) with firmware that already exposes the device's local interface, on the same LAN as the rui host;
   - a device token (`RUI_DEVICE_TOKEN`, or the `token_env` value in the plug config) that you provide;
   - the listen port (default `4412`) reachable on the rui host;
   - this project only provides the software bridge; preparing firmware and network is up to you, using the device's existing capabilities.
 - Wake and barge-in rely on rui's server-side KWS (Chinese); the device makes no wake decision.
+
+| rui core | This plug | Notes |
+|---|---|---|
+| **0.7.8** (current) | **0.2.2** | Recommended; core image + external plug directory |
+| 0.7.4 (historical) | 0.2.2 | The external plug works the same way |
 
 ## Support matrix
 
@@ -213,6 +234,11 @@ No ffmpeg build needed (the image ships it)
 | `plug-test` fails | Wrong rui version or plug path | Run `rui plug-test <plugin-dir> --adapter rui_xiaoai_bridge.adapter:build` inside the container |
 
 ## Known limitations
+
+- A third-party manifest without `wake_words_residual` gets no vendor-phrase backstop.
+- Two speakers start one plane by default unless `multi_device: {enabled: true, max_planes: 2}` is set.
+- A self-signed certificate only starts the plane; real-device trust depends on its CA.
+
 
 - LX06 numbers are historical (19/20 wake, 205.2 ms barge-in) with **no** 0.7.2 re-measurement.
 - Voice-command success rate, volume, LED and concurrency are **untested**.
