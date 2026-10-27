@@ -91,8 +91,6 @@ docker run --rm -v /vol1/rui/plugins:/opt/rui-plugins:ro -e PYTHONPATH=/opt/rui-
 
 ## 支持矩阵
 
-> 数字来自历史真机实测（2026-10），**未测项一律标「未测」**；引用时请连同日期一起引用。
-
 | 能力 | 状态 |
 |---|---|
 | 唤醒（服务端中文 KWS） | 19/20（历史实测） |
