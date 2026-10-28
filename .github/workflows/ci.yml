@@ -29,9 +29,10 @@ jobs:
 
       # rui is the in-process host, not a dependency of the package. CI installs the
       # exact upstream release the manifest declares compatibility with; the PyPI
-      # `rui` project is unrelated, so the GitHub tag is explicit.
+      # `rui` project is unrelated, so the GitHub tag is explicit. The manifest's new
+      # floor is 0.7.0, so the pin tracks the newest verified 0.7.x (>= 0.7.0).
       - name: Install rui host (pinned)
-        run: pip install "rui @ git+https://github.com/yes999zc/rui.git@v0.6.0"
+        run: pip install "rui @ git+https://github.com/yes999zc/rui.git@v0.7.9"
 
       - name: Lint
         run: ruff check .

@@ -3,6 +3,37 @@
 All notable changes to **rui-xiaoai-bridge** are documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-10-28
+
+### Changed
+
+- **双窗口**：`rui_compat` 由 `">=0.6.0 <0.8.0"` 换成 `">=0.7.0 <0.9.0"`——同一个插件包同时
+  接受 rui 0.7.x 与 0.8.x，0.8.0 的破坏性变更不要求桥再发一版（上界抬到 0.9.0，不收窄到只认 0.8.x）。
+- **下限抬到 0.7.0**：0.6.x 不再支持，0.2.3 的 manifest 在 0.6.x 核心上会被 loader 拒载；
+  仍要跑 0.6.x 的请留在插件 0.2.2。
+- `devices/lx06.yaml` 的 `compatibility.tested_with` 追加 `"0.7.9"`；`rui_min` 仍是 `"0.6.0"`
+  （它表示设备清单自身需要的最低 core，与插件窗口是两件事）。
+- CI 的宿主 pin 由 `rui@v0.6.0` 换成 `v0.7.9`；插件版本 0.2.2 → **0.2.3**。
+- adapter 与设备行为无变更：本次只动 manifest 窗口与文档。
+
+### Verified
+
+- `PYTHONPATH=src pytest` → **87 passed, 11 skipped**（skip 全是未设 `RUI_TEST_MODELS` 的 KWS/VAD
+  模型用例）；`ruff check .` → All checks passed。
+- 宿主 0.7.9（`git archive v0.7.9` 的干净导出，`rui.__version__ == "0.7.9"`）：
+  `python -m rui plug-test src/rui_xiaoai_bridge --adapter rui_xiaoai_bridge.adapter:build`
+  → `pass=15 fail=0 warn=1 skip=5 -> PASS`，其中 `manifest.compatibility` 读作
+  `requires >=0.7.0 <0.9.0; this build is 0.7.9`。唯一 WARN 为 `device.probe_layout`
+  （probe 只报单麦、`ref_channels=0`），与本窗口无关；5 项 SKIP 是入站 LX06 需真机 client 拨入的用例。
+- **未验**：0.8.0 预发核心上的加载（core 0.8.0 尚未产出，按 0.8 顺序表等 core 落地后跑）；
+  LX06 真机未重测，指标仍是 2026-10-24 历史值。
+
+### Notes
+
+- **v0.2.3 的 tag/release 待 9 哥批准**（tag/release pending 9哥 approval）：截至本条目，
+  仓库最新 tag 仍是 `v0.2.2`；打 tag 之前，双窗口构建请按 README 用 `main`，不要 clone 这个
+  尚未打出的标签。
+
 ## [0.2.2] - 2026-10-26
 
 ### Fixed

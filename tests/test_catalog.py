@@ -32,7 +32,7 @@ def _available(plugin) -> bool:
 
     Kept local instead of importing a web-layer helper: the oldest rui in the
     declared `rui_compat` window must be able to run this suite, and the console v2
-    module is newer than the 0.6.0 release tag. The real endpoint is exercised by the
+    module is newer than the 0.7.0 floor. The real endpoint is exercised by the
     Phase 1 acceptance run recorded in the rui plan document.
     """
     if plugin.trust not in (TrustLevel.BUILTIN, TrustLevel.TRUSTED):

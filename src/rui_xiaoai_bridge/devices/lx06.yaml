@@ -65,8 +65,8 @@ params:
   - {key: wake_words, label: "唤醒词", type: list, default: ["你好小瑞"], max: 3}
 compatibility:
   rui_min: "0.6.0"
-  tested_with: ["0.6.0"]
-  notes: "A-class coexistence with the stock firmware; open-xiaoai client required. Wake is RUI KWS (v1 default when the wake block is omitted), not device_wake. audio_defaults declares the 8 ch / 6 mic / 2 ref / 48 kHz layout. 0.6.x is the verified window; see README."
+  tested_with: ["0.6.0", "0.7.9"]
+  notes: "A-class coexistence with the stock firmware; open-xiaoai client required. Wake is RUI KWS (v1 default when the wake block is omitted), not device_wake. audio_defaults declares the 8 ch / 6 mic / 2 ref / 48 kHz layout. 0.7.x is verified through 0.7.9 and the same package also targets the 0.8.x line (dual window); see README."
 acceptance:
   verified: true
   last_verified: "2026-10-26"
